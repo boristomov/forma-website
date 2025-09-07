@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Outer border -->
+  <rect x="5" y="5" width="90" height="90" fill="none" stroke="#666666" stroke-width="5"/>
+  <!-- Stylized E -->
+  <path d="M65 20 H30 V80 H65 M30 20 H70 M30 50 H75 M30 80 H70"
+        fill="none" stroke="#666666" stroke-width="10" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>
