@@ -584,7 +584,7 @@
                   </div>
               </div>
           </div>
-        <form id="contactForm" action="http://localhost:3000/api/contact"
+        <form id="contactForm" action="https://forma-api-kxgi.onrender.com/api/contact"
               method="POST"
               enctype="application/x-www-form-urlencoded">
           <div class="row">
@@ -1623,7 +1623,7 @@
     e.preventDefault();
 
     // always use absolute API URL; file:// pages don’t have a good base
-    const url = "http://localhost:3000/api/contact";
+    const url = "https://forma-api-kxgi.onrender.com/api/contact";
 
     const data = Object.fromEntries(new FormData(form).entries());
     const submitBtn = form.querySelector('button[type="submit"]');
