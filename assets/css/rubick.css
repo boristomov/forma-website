@@ -1986,19 +1986,22 @@ a:hover {
   animation-fill-mode: both;
 }
 
-.loading {
+/* Loader overlay */
+.loading{
   position: fixed;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
+  inset: 0;               /* shorthand for top/left/width/height */
+  background: #fff;
   z-index: 1032;
   opacity: 1;
-  transition: opacity 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+  transition: opacity .5s cubic-bezier(0.7,0,0.3,1), visibility 0s linear .5s;
+  /* if you keep your existing .loading-container styles, no change needed */
 }
-.loading.hide {
-  display: none;
+.loading.hide{
+  opacity: 0;
+  visibility: hidden;     /* becomes hidden after the fade completes */
+  pointer-events: none;   /* ensure clicks pass through */
 }
+
 .loading .loading-container {
   z-index: 1033;
   display: block;

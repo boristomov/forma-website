@@ -358,10 +358,11 @@
     </div>
 <div class="section section-clients-2" id="friends2">
   <div class="video-background">
-    <video autoplay muted loop playsinline>
-      <source src="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
+    <!-- in #friends2 -->
+<video autoplay muted loop playsinline preload="auto" poster="assets/img/Sgrada_Varna_4_poster.jpg">
+  <source src="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
+</video>
+
   </div>
 
   <div class="overlay-content">
@@ -2389,6 +2390,75 @@
 <!-- put this just before </body> -->
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 <script>
+(function () {
+  const overlay = document.querySelector('.loading');
+  if (!overlay) return;
+
+  const MIN_SHOW = 600;   // keep loader up at least this long (ms) to avoid flicker
+  const MAX_WAIT = 8000;  // safety timeout (ms)
+  const start = performance.now();
+  const tasks = [];
+
+  // 1) Background video (friends2)
+  const video = document.querySelector('#friends2 .video-background video');
+  if (video) {
+    // make sure browser starts fetching the video
+    video.preload = 'auto';
+    try { video.load(); } catch (_) {}
+
+    tasks.push(new Promise(resolve => {
+      const done = () => resolve();
+      video.addEventListener('canplaythrough', done, { once: true });
+      video.addEventListener('loadeddata',     done, { once: true });
+      video.addEventListener('error',          done, { once: true });
+      // iOS sometimes needs an explicit play kick after we unhide:
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && video.muted) video.play().catch(()=>{});
+      }, { once: true });
+    }));
+  }
+
+  // 2) First-screen images (header + first visible section)
+  const firstScreenImgs = document.querySelectorAll(
+    '.section-header img, .section.section-header .full-image > img, #whoWeAre img'
+  );
+  firstScreenImgs.forEach(img => {
+    if (img.complete && img.naturalWidth) return;
+    tasks.push(new Promise(res => {
+      img.addEventListener('load', res, { once: true });
+      img.addEventListener('error', res, { once: true });
+    }));
+  });
+
+  // 3) Also preload any hero slider background DIVs (if you use them)
+  document.querySelectorAll('.hero-slider .bg-slide').forEach(div => {
+    const m = (div.style.backgroundImage || '').match(/url\\(["']?(.+?)["']?\\)/i);
+    const url = m && m[1];
+    if (!url) return;
+    tasks.push(new Promise(res => {
+      const i = new Image();
+      i.onload = res;
+      i.onerror = res;
+      i.src = url;
+    }));
+  });
+
+  // Race: when everything is ready OR timeout hits
+  Promise.race([
+    Promise.all(tasks),
+    new Promise(res => setTimeout(res, MAX_WAIT))
+  ]).then(() => {
+    const left = Math.max(0, MIN_SHOW - (performance.now() - start));
+    setTimeout(() => {
+      overlay.classList.add('hide'); // triggers the fade-out
+      // Try to start the video (muted autoplay is allowed)
+      if (video && video.paused && video.muted) { video.play().catch(()=>{}); }
+    }, left);
+  });
+})();
+</script>
+
+<script>
   document.addEventListener("DOMContentLoaded", () => {
     AOS.init({
       duration: 800,   // animation speed (ms)
@@ -2403,61 +2473,6 @@
   window.addEventListener("load", () => {
     AOS.refreshHard();
   });
-</script>
-<script>
-(function () {
-  document.body.classList.add('is-loading');
-  const overlay = document.querySelector('.loading');
-
-  // Find your hero container (adjust selector if needed)
-  const hero = document.querySelector('.section-header .hero-slider') 
-            || document.getElementById('home') 
-            || document.querySelector('.section-header');
-
-  const video   = hero && hero.querySelector('video');
-  const slides  = hero ? Array.from(hero.querySelectorAll('.bg-slide')) : [];
-  const inlineImg = hero ? hero.querySelector('img') : null;
-
-  const TIMEOUT_MS = 7000; // fallback so users aren't stuck
-
-  function waitVideo(v){
-    if (!v) return Promise.resolve();
-    v.muted = true; v.playsInline = true; v.setAttribute('playsinline',''); v.preload = v.preload || 'auto';
-    const p = v.play(); if (p && p.catch) p.catch(()=>{});
-    if (v.readyState >= 2) return Promise.resolve();
-    return new Promise(res => {
-      const done = () => { v.removeEventListener('loadeddata', done); v.removeEventListener('canplaythrough', done); res(); };
-      v.addEventListener('loadeddata', done, { once:true });
-      v.addEventListener('canplaythrough', done, { once:true });
-    });
-  }
-
-  function waitFirstBg(imgDivs){
-    if (!imgDivs || !imgDivs.length) return Promise.resolve();
-    const el = imgDivs[0];
-    const bg = el.style.backgroundImage || getComputedStyle(el).backgroundImage;
-    if (!bg || bg === 'none') return Promise.resolve();
-    const url = bg.replace(/^url\((['"]?)(.*?)\1\)$/, '$2');
-    return new Promise(res => { const i = new Image(); i.onload = res; i.onerror = res; i.src = url; });
-  }
-
-  function waitInlineImg(img){
-    if (!img) return Promise.resolve();
-    if (img.complete && img.naturalWidth) return Promise.resolve();
-    return new Promise(res => { img.addEventListener('load', res, { once:true }); img.addEventListener('error', res, { once:true }); });
-  }
-
-  Promise.race([
-    Promise.all([ waitVideo(video), waitFirstBg(slides), waitInlineImg(inlineImg) ]),
-    new Promise(res => setTimeout(res, TIMEOUT_MS))
-  ]).then(() => {
-    overlay.classList.add('hidden');
-    setTimeout(() => {
-      overlay.remove();
-      document.body.classList.remove('is-loading');
-    }, 360);
-  });
-})();
 </script>
 
 </body>
@@ -2819,6 +2834,7 @@
   PROJECTS.forEach(setupProject);
 })();
 </script>
+
 
 
 
