@@ -2404,6 +2404,61 @@
     AOS.refreshHard();
   });
 </script>
+<script>
+(function () {
+  document.body.classList.add('is-loading');
+  const overlay = document.querySelector('.loading');
+
+  // Find your hero container (adjust selector if needed)
+  const hero = document.querySelector('.section-header .hero-slider') 
+            || document.getElementById('home') 
+            || document.querySelector('.section-header');
+
+  const video   = hero && hero.querySelector('video');
+  const slides  = hero ? Array.from(hero.querySelectorAll('.bg-slide')) : [];
+  const inlineImg = hero ? hero.querySelector('img') : null;
+
+  const TIMEOUT_MS = 7000; // fallback so users aren't stuck
+
+  function waitVideo(v){
+    if (!v) return Promise.resolve();
+    v.muted = true; v.playsInline = true; v.setAttribute('playsinline',''); v.preload = v.preload || 'auto';
+    const p = v.play(); if (p && p.catch) p.catch(()=>{});
+    if (v.readyState >= 2) return Promise.resolve();
+    return new Promise(res => {
+      const done = () => { v.removeEventListener('loadeddata', done); v.removeEventListener('canplaythrough', done); res(); };
+      v.addEventListener('loadeddata', done, { once:true });
+      v.addEventListener('canplaythrough', done, { once:true });
+    });
+  }
+
+  function waitFirstBg(imgDivs){
+    if (!imgDivs || !imgDivs.length) return Promise.resolve();
+    const el = imgDivs[0];
+    const bg = el.style.backgroundImage || getComputedStyle(el).backgroundImage;
+    if (!bg || bg === 'none') return Promise.resolve();
+    const url = bg.replace(/^url\((['"]?)(.*?)\1\)$/, '$2');
+    return new Promise(res => { const i = new Image(); i.onload = res; i.onerror = res; i.src = url; });
+  }
+
+  function waitInlineImg(img){
+    if (!img) return Promise.resolve();
+    if (img.complete && img.naturalWidth) return Promise.resolve();
+    return new Promise(res => { img.addEventListener('load', res, { once:true }); img.addEventListener('error', res, { once:true }); });
+  }
+
+  Promise.race([
+    Promise.all([ waitVideo(video), waitFirstBg(slides), waitInlineImg(inlineImg) ]),
+    new Promise(res => setTimeout(res, TIMEOUT_MS))
+  ]).then(() => {
+    overlay.classList.add('hidden');
+    setTimeout(() => {
+      overlay.remove();
+      document.body.classList.remove('is-loading');
+    }, 360);
+  });
+})();
+</script>
 
 </body>
 
