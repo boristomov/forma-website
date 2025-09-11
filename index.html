@@ -25,6 +25,11 @@
 </head>
 
 <body id="skrollr-body">
+  <!-- Cursor -->
+  <div class="fx-cursor" aria-hidden="true">
+  <div class="fx-cursor__ring"></div>
+  <div class="fx-cursor__dot"></div>
+</div>
   <div class="loading ">
   <div class="loading-container">
     <p>Добре дошли във Форма...</p>
@@ -143,7 +148,9 @@
   </div>
                     <div class="description">
                       <h3 class="big-text">Боян Томов</h3>
-                      <p class="small-text">Интериорен Дизайнер и Архитект</p>
+                      <p class="small-text">Интериорен Дизайнер
+                  
+                      </p>
                       <p class="details"> 
                         CEO / CO-Founder <br>
                         tomov@forma-bg.eu
@@ -306,7 +313,7 @@
     
     <div class="section section-header">
         <div class="full-image pattern-image"> 
-            <img src="assets/img/backgroundarchitecture.jpg"/>
+            <img src="assets/img/3_Къщи_Терапията/106.jpg"/>
            
             <div class="container"> 
                 <div class="content content-with-opacity">
@@ -323,7 +330,7 @@
         <div class="row">
                 <div class="col-lg-4 col-md-6 col-sm-6">
                     <div class="project add-animation animation-1">
-                          <img src="assets/img/modernarchlights2.jpg"/>
+                          <img src="assets/img/modernarch.jpg"/>
                           <a class="over-area color-1" href="javascript:void(0)" onClick="rubik.showModal(this)" data-target="project_7">
                                <div class="content">
                                   <h4>Модерна Архитектура</h4>
@@ -345,7 +352,7 @@
                 </div>
                 <div class="col-lg-4 col-md-6 col-sm-6">
                     <div class="project add-animation animation-3">
-                          <img src="assets/img/modernlights.jpg"/>
+                          <img src="assets/img/modernapartment.jpg"/>
                            <a class="over-area color-1" href="javascript:void(0)" onClick="rubik.showModal(this)" data-target="project_9">
                                <div class="content">
                                   <h4>Жилищни Сгради</h4>
@@ -2572,6 +2579,86 @@ window.addEventListener("load", () => {
   });
 })();
 </script>
+<script>
+(function () {
+  // Enable on desktop widths OR fine pointers (covers your 991px case)
+  const enable = window.innerWidth >= 992 || matchMedia('(pointer:fine)').matches;
+  if (!enable) return;
+
+  // Ensure cursor element exists
+  let cursor = document.querySelector('.fx-cursor');
+  if (!cursor) {
+    cursor = document.createElement('div');
+    cursor.className = 'fx-cursor';
+    cursor.innerHTML = '<div class="fx-cursor__ring"></div><div class="fx-cursor__dot"></div>';
+  }
+
+  // If <body> is transformed (parallax), attach to <html> to escape clipping
+  const cs = getComputedStyle(document.body);
+  const bodyTransformed =
+    (cs.transform && cs.transform !== 'none') ||
+    (cs.webkitTransform && cs.webkitTransform !== 'none') ||
+    (cs.filter && cs.filter !== 'none') ||
+    (cs.perspective && cs.perspective !== 'none');
+
+  const root = document.documentElement; // <html>
+  if (bodyTransformed) {
+    if (cursor.parentNode !== root) root.appendChild(cursor);
+  } else {
+    if (cursor.parentNode !== document.body) document.body.appendChild(cursor);
+  }
+
+  document.documentElement.classList.add('fx-cursor-ready');
+
+  const ring = cursor.querySelector('.fx-cursor__ring');
+  const dot  = cursor.querySelector('.fx-cursor__dot');
+  if (!ring || !dot) return;
+
+  let mx=-100, my=-100, rx=mx, ry=my;
+  const lerp=(a,b,n)=>(1-n)*a+n*b, ease=0.16;
+
+  function frame(){
+    rx = lerp(rx, mx, ease);
+    ry = lerp(ry, my, ease);
+    dot.style.transform  = `translate3d(${mx}px, ${my}px, 0)`;
+    ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; }, {passive:true});
+  addEventListener('mousedown', () => cursor.classList.add('fx-cursor--down'));
+  addEventListener('mouseup',   () => cursor.classList.remove('fx-cursor--down'));
+
+  const HOVER_SELECTOR = 'a, button, [role="button"], .btn, .slick-arrow, [data-cursor], [onclick]';
+  document.querySelectorAll(HOVER_SELECTOR).forEach(el=>{
+    el.addEventListener('mouseenter', ()=>{
+      cursor.classList.add('fx-cursor--hover');
+      if (el.dataset.cursor === 'magnet') cursor.classList.add('fx-cursor--magnet');
+    });
+    el.addEventListener('mouseleave', ()=>{
+      cursor.classList.remove('fx-cursor--hover','fx-cursor--magnet');
+    });
+  });
+
+  // If you change layout on resize across 992px, you can re-run the mount logic:
+  addEventListener('resize', () => {
+    const enableNow = window.innerWidth >= 992 || matchMedia('(pointer:fine)').matches;
+    if (!enableNow) return;
+    const cs2 = getComputedStyle(document.body);
+    const transformed =
+      (cs2.transform && cs2.transform !== 'none') ||
+      (cs2.webkitTransform && cs2.webkitTransform !== 'none') ||
+      (cs2.filter && cs2.filter !== 'none') ||
+      (cs2.perspective && cs2.perspective !== 'none');
+    if (transformed && cursor.parentNode !== root) root.appendChild(cursor);
+    if (!transformed && cursor.parentNode !== document.body) document.body.appendChild(cursor);
+  });
+})();
+</script>
+
+
+
 
 </body>
 

@@ -4507,7 +4507,7 @@ body.noscroll {
     min-height: auto !important;      /* don't force a viewport height */
     height: auto !important;
   }
-
+}
   /* use the inline image, full width, natural height */
   .section-header .full-image > img {
     display: block !important;
@@ -4530,6 +4530,69 @@ body.noscroll {
 }
 
 
-
-
+/* Show custom cursor only on devices with a fine pointer (desktop) */
+/* EITHER pointer:fine OR >= 992px */
+@media (pointer: fine), (min-width: 992px) {
+  html.fx-cursor-ready body { cursor: none !important; } /* hide native */
 }
+        /* hide native cursor */
+
+  .fx-cursor{
+  position: fixed;
+  inset: 0;                     /* full viewport */
+  z-index: 2147483647;
+  pointer-events: none;
+  mix-blend-mode: difference;   /* comment out if it “disappears” visually */
+}
+.fx-cursor__ring,.fx-cursor__dot{
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform, width, height, opacity;
+  transform: translate3d(-50%,-50%,0);
+}
+.fx-cursor__ring{ width:36px; height:36px; border:2px solid #fff; opacity:.9; transition: width .2s, height .2s, transform .08s, opacity .2s; }
+.fx-cursor__dot{  width:6px;  height:6px;  background:#fff; transition: transform .08s, opacity .2s; }
+.fx-cursor--hover .fx-cursor__ring{ width:56px; height:56px; opacity:1; }
+.fx-cursor--down  .fx-cursor__ring{ transform: translate3d(-50%,-50%,0) scale(.9); }
+.fx-cursor--down  .fx-cursor__dot { transform: translate3d(-50%,-50%,0) scale(.8); }
+
+
+/* configurable color */
+:root { --cursor-color: #fff; }
+
+/* default look */
+.fx-cursor__ring { 
+  border: 2px solid var(--cursor-color);
+  background: transparent;
+}
+.fx-cursor__dot  { 
+  background: var(--cursor-color);
+}
+
+/* when hovering a clickable element -> fill the big circle */
+.fx-cursor--hover .fx-cursor__ring {
+  width: 56px;                   /* you already had this grow; keep if you like */
+  height: 56px;
+  background: var(--cursor-color);   /* << fill */
+  border-color: transparent;         /* hide the ring outline for a clean fill */
+  opacity: 1;
+}
+
+/* hide the small dot so it looks like a single filled circle */
+.fx-cursor--hover .fx-cursor__dot { 
+  opacity: 0;
+}
+
+/* (optional) magnet state also filled, just larger */
+.fx-cursor--magnet .fx-cursor__ring {
+  width: 74px;
+  height: 74px;
+  background: var(--cursor-color);
+  border-color: transparent;
+}
+
+/* click feedback still works */
+.fx-cursor--down .fx-cursor__ring { 
+  transform: translate3d(-50%,-50%,0) scale(.9);
+}
+
