@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/png" href="assets/img/forma_grayL.png">
+    <link rel="preload" as="video" href="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
+
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     
     <title>Форма Интериорен Дизайн | Студио за цялостно проектно изпълнение</title>
@@ -2389,90 +2391,186 @@
 </div>
 <!-- put this just before </body> -->
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<!-- AOS lib (keep as you had it) -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+<!-- 1) Loader control: wait ONLY for the hero video, then fade out -->
 <script>
 (function () {
   const overlay = document.querySelector('.loading');
   if (!overlay) return;
 
-  const MIN_SHOW = 600;   // keep loader up at least this long (ms) to avoid flicker
-  const MAX_WAIT = 8000;  // safety timeout (ms)
+  const MIN_SHOW = 600;   // ms
+  const MAX_WAIT = 8000;  // ms
   const start = performance.now();
+
+  // Find your background/hero video
+  const video =
+    document.querySelector('#friends2 .video-background video') ||
+    document.querySelector('.video-background video');
+
   const tasks = [];
-
-  // 1) Background video (friends2)
-  const video = document.querySelector('#friends2 .video-background video');
   if (video) {
-    // make sure browser starts fetching the video
-    video.preload = 'auto';
-    try { video.load(); } catch (_) {}
-
+    try { video.preload = 'auto'; video.load(); } catch (_) {}
     tasks.push(new Promise(resolve => {
       const done = () => resolve();
       video.addEventListener('canplaythrough', done, { once: true });
       video.addEventListener('loadeddata',     done, { once: true });
       video.addEventListener('error',          done, { once: true });
-      // iOS sometimes needs an explicit play kick after we unhide:
+      // iOS kick after unhide if needed
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden && video.muted) video.play().catch(()=>{});
       }, { once: true });
     }));
   }
 
-  // 2) First-screen images (header + first visible section)
-  const firstScreenImgs = document.querySelectorAll(
-    '.section-header img, .section.section-header .full-image > img, #whoWeAre img'
-  );
-  firstScreenImgs.forEach(img => {
-    if (img.complete && img.naturalWidth) return;
-    tasks.push(new Promise(res => {
-      img.addEventListener('load', res, { once: true });
-      img.addEventListener('error', res, { once: true });
-    }));
-  });
-
-  // 3) Also preload any hero slider background DIVs (if you use them)
-  document.querySelectorAll('.hero-slider .bg-slide').forEach(div => {
-    const m = (div.style.backgroundImage || '').match(/url\\(["']?(.+?)["']?\\)/i);
-    const url = m && m[1];
-    if (!url) return;
-    tasks.push(new Promise(res => {
-      const i = new Image();
-      i.onload = res;
-      i.onerror = res;
-      i.src = url;
-    }));
-  });
-
-  // Race: when everything is ready OR timeout hits
   Promise.race([
     Promise.all(tasks),
     new Promise(res => setTimeout(res, MAX_WAIT))
   ]).then(() => {
     const left = Math.max(0, MIN_SHOW - (performance.now() - start));
     setTimeout(() => {
-      overlay.classList.add('hide'); // triggers the fade-out
-      // Try to start the video (muted autoplay is allowed)
-      if (video && video.paused && video.muted) { video.play().catch(()=>{}); }
+      overlay.classList.add('hide'); // CSS fade-out
+      if (video && video.paused && video.muted) video.play().catch(()=>{});
     }, left);
   });
 })();
 </script>
 
+<!-- 2) AOS init (same as you had) -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    AOS.init({
-      duration: 800,   // animation speed (ms)
-      easing: 'ease-out',
-      offset: 60,      // how far from bottom before triggering
-      once: true,      // play animation only once
-      mirror: false    // don't animate again on scroll up
-    });
+document.addEventListener("DOMContentLoaded", () => {
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out',
+    offset: 60,
+    once: true,
+    mirror: false
   });
+});
+window.addEventListener("load", () => {
+  AOS.refreshHard();
+});
+</script>
 
-  // Refresh after all images are loaded so positions are correct
-  window.addEventListener("load", () => {
-    AOS.refreshHard();
+<!-- 3) Carousel preloader: aggressively warm up first-section images (non-blocking) -->
+<script>
+(function () {
+  // Adjust these to match your carousels/hero
+  const CONTAINERS = [
+    '.hero-slider',                 // background slides
+    '.section-header .carousel',    // landing carousel (if <img>-based)
+    '#friends .carousel',
+    '#whoWeAre .carousel'
+  ];
+
+  const MAX_PRELOAD_LINKS = 8; // first N get <link rel="preload" as="image">
+  const urls = new Set();
+
+  const isData = u => /^data:/i.test(u);
+  const abs    = u => { try { return new URL(u, document.baseURI).href; } catch { return u; } };
+  const bgUrl  = s => { const m = s && s.match(/url\(["']?(.+?)["']?\)/i); return m ? m[1] : null; };
+
+  function collect() {
+    CONTAINERS.forEach(sel => {
+      document.querySelectorAll(sel).forEach(cont => {
+        // <img> inside carousels
+        cont.querySelectorAll('img').forEach(img => {
+          let u = img.currentSrc || img.getAttribute('src') || '';
+          if (!u && img.srcset) {
+            const last = img.srcset.split(',').pop().trim().split(' ')[0];
+            u = last || '';
+          }
+          if (u) urls.add(abs(u));
+        });
+        // CSS backgrounds (.bg-slide or any inline background-image)
+        cont.querySelectorAll('.bg-slide, [style*="background-image"]').forEach(el => {
+          const u = el.dataset.bg || bgUrl(el.style && el.style.backgroundImage);
+          if (u) urls.add(abs(u));
+        });
+      });
+    });
+    // Drop data URIs
+    for (const u of Array.from(urls)) if (isData(u)) urls.delete(u);
+  }
+
+  function addPreloadLinks() {
+    const head = document.head || document.getElementsByTagName('head')[0];
+    let count = 0;
+    for (const u of urls) {
+      if (count >= MAX_PRELOAD_LINKS) break;
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as  = 'image';
+      link.href = u;
+      head.appendChild(link);
+      count++;
+    }
+  }
+
+  function warmCacheStaggered() {
+    let i = 0;
+    for (const u of urls) {
+      const img = new Image();
+      img.decoding = 'async';
+      setTimeout(() => { img.src = u; }, i * 120); // stagger requests
+      i++;
+    }
+  }
+
+  function prioritizeFirstVisible() {
+    const firstImg = document.querySelector(
+      '.section-header .carousel img, .hero-slider img'
+    );
+    if (firstImg) {
+      firstImg.loading = 'eager';
+      firstImg.fetchPriority = 'high';
+      firstImg.decoding = 'async';
+    }
+  }
+
+  function run() {
+    collect();
+    addPreloadLinks();        // highest priority for first few images
+    prioritizeFirstVisible(); // ensure first visual image is eager/high
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(warmCacheStaggered, { timeout: 1500 });
+    } else {
+      setTimeout(warmCacheStaggered, 200);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+</script>
+
+<!-- 4) Lazy attributes for thumbnails / non-critical images -->
+<script>
+(function(){
+  const selectors = [
+    '.project-content img',
+    '.project img',
+    '.projects img',
+    '#store-filters .project img',
+    '.section-header .carousel img',
+    '.hero-slider img',
+    '#whoWeAre .carousel img',
+    '#friends .carousel img'
+  ];
+  const imgs = new Set();
+  selectors.forEach(sel => document.querySelectorAll(sel).forEach(i => imgs.add(i)));
+  imgs.forEach(img => {
+    try {
+      img.setAttribute('loading', 'lazy');
+      img.setAttribute('decoding', 'async');
+      img.setAttribute('fetchpriority', 'low');
+    } catch (e) {}
   });
+})();
 </script>
 
 </body>
