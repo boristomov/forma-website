@@ -2047,7 +2047,7 @@ a:hover {
   height: 100vh;
   overflow: hidden;
   display: block;
-  /* position: relative; */
+  position: relative;
 }
 
 .section .parallax > img,
@@ -2388,7 +2388,14 @@ a,
 /*   end animation   */
 .pattern-image {
   width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
   background-size: 100%;
+  background: #000;
+  height: 100%;
+  background: url("../img/pattern.png");
+  z-index: 100;
 }
 .pattern-image:after {
   position: absolute;
@@ -4284,8 +4291,12 @@ body.noscroll {
 /* 2) Hide the inline <img> ONLY after bg is applied */
 .section-header .full-image > img { display: none !important; }
 
-/* 3) (Optional) remove the pattern overlay so the photo shows clearly */
-.section-header .pattern-image:after { display: none !important; }
+/* Re-enable pattern overlay on the top carousel */
+.section-header .pattern-image:after {
+  display: block !important;   /* undo the previous disable */
+  opacity: .4;                 /* your default */
+}
+
 
 /* 4) Keep the same crop across breakpoints (tweak % to taste) */
 /* @media (min-width: 992px) {
@@ -4517,11 +4528,7 @@ body.noscroll {
   }
 
   /* remove overlays/patterns that might look like a second image */
-  .section-header .pattern-image::before,
-  .section-header .pattern-image::after {
-    display: none !important;
-    content: none !important;
-  } 
+ 
 /* Make sure the header area has height, since we removed the <img> */
 .section-header .hero-slider {
   position: relative;
@@ -4596,3 +4603,9 @@ body.noscroll {
   transform: translate3d(-50%,-50%,0) scale(.9);
 }
 
+.video-background{
+  border: 50px solid white;
+}
+.image-padding{
+  border: 50px solid white;
+}
