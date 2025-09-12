@@ -2398,7 +2398,7 @@ a,
   z-index: 100;
 }
 .pattern-image:after {
-  position: relative;
+  position: absolute;
   left: 0;
   top: 0;
   width: 100%;
