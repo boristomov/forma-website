@@ -129,9 +129,24 @@ input[type="file"]>input[type="button"]::-moz-focus-inner {
 }
 
 /* apply to project_10 and project_12 */
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #store-filters .project,
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #store-filters .project .over-area,
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #store-filters .project img {
+#project_7 #store-filters .project,
+#project_8 #store-filters .project,
+#project_9 #store-filters .project,
+#project_10 #store-filters .project,
+#project_11 #store-filters .project,
+#project_12 #store-filters .project,
+#project_7 #store-filters .project .over-area,
+#project_8 #store-filters .project .over-area,
+#project_9 #store-filters .project .over-area,
+#project_10 #store-filters .project .over-area,
+#project_11 #store-filters .project .over-area,
+#project_12 #store-filters .project .over-area,
+#project_7 #store-filters .project img,
+#project_8 #store-filters .project img,
+#project_9 #store-filters .project img,
+#project_10 #store-filters .project img,
+#project_11 #store-filters .project img,
+#project_12 #store-filters .project img {
   opacity: 1 !important;
   visibility: visible !important;
   transform: none !important;
@@ -283,25 +298,55 @@ body {
   }
 }
 
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #store-filters .project img {
+#project_7 #store-filters .project img,
+#project_8 #store-filters .project img,
+#project_9 #store-filters .project img,
+#project_10 #store-filters .project img,
+#project_11 #store-filters .project img,
+#project_12 #store-filters .project img {
   display: block;
   width: 100%;
   /* height: auto; */
 }
 
-/* transparent overlay so boxes aren’t solid white */
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #store-filters .project .over-area {
+/* transparent overlay so boxes aren't solid white */
+#project_7 #store-filters .project .over-area,
+#project_8 #store-filters .project .over-area,
+#project_9 #store-filters .project .over-area,
+#project_10 #store-filters .project .over-area,
+#project_11 #store-filters .project .over-area,
+#project_12 #store-filters .project .over-area {
   background: transparent !important;
 }
 
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #store-filters .project:hover .over-area {
+#project_7 #store-filters .project:hover .over-area,
+#project_8 #store-filters .project:hover .over-area,
+#project_9 #store-filters .project:hover .over-area,
+#project_10 #store-filters .project:hover .over-area,
+#project_11 #store-filters .project:hover .over-area,
+#project_12 #store-filters .project:hover .over-area {
   background: rgba(0, 0, 0, .35) !important;
 }
 
 /* make the modal section transparent */
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) .project-details,
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #filtering-boxes,
-:is(#project_7, #project_8, #project_9, #project_10, #project_11, #project_12) #filtering-boxes .container {
+#project_7 .project-details,
+#project_8 .project-details,
+#project_9 .project-details,
+#project_10 .project-details,
+#project_11 .project-details,
+#project_12 .project-details,
+#project_7 #filtering-boxes,
+#project_8 #filtering-boxes,
+#project_9 #filtering-boxes,
+#project_10 #filtering-boxes,
+#project_11 #filtering-boxes,
+#project_12 #filtering-boxes,
+#project_7 #filtering-boxes .container,
+#project_8 #filtering-boxes .container,
+#project_9 #filtering-boxes .container,
+#project_10 #filtering-boxes .container,
+#project_11 #filtering-boxes .container,
+#project_12 #filtering-boxes .container {
   background: transparent !important;
 }
 
@@ -3913,7 +3958,7 @@ body.noscroll {
 }
 
 .section-clients-2 .nav-text {
-  margin: 0 auto;
+  margin: 15px auto;
   text-align: center;
 }
 
@@ -4757,7 +4802,7 @@ body.noscroll {
 .section-numbers-3 .parallax {
   position: absolute;
   z-index: 1;
-  height: 650px;
+  height: auto;
 }
 
 .section-numbers-2 .container,
@@ -5075,6 +5120,7 @@ body.noscroll {
   /* ========== HERO (Section Header) – FINAL OVERRIDES ========== */
   .section-header {
     padding: 0 !important;
+    border: none !important;
   }
 
   /* 1) Give the hero a reliable height and set the background image */
@@ -5352,6 +5398,7 @@ body.noscroll {
     min-height: auto !important;
     /* don't force a viewport height */
     height: auto !important;
+    /* border: none !important; */
   }
 }
 
@@ -5489,6 +5536,17 @@ body.noscroll {
   border: 50px solid white;
 }
 
+/* Remove borders on smartphone screens */
+@media (max-width: 768px) {
+  .video-background {
+    border: none;
+  }
+
+  .image-padding {
+    border: none;
+  }
+}
+
 /* Interior section: remove gradient and frame, enable overlap */
 /* #interior .pattern-image:after {
   display: none !important;
@@ -5503,7 +5561,7 @@ body.noscroll {
 
 /* Create generous overlap so projects float over the interior image */
 #interior+.section.section-we-made-1 {
-  margin-top: 110vh;
+  top: 110vh;
   /* tune overlap */
   position: relative;
   z-index: 2;
@@ -5535,7 +5593,9 @@ body.noscroll {
 #architecture .image-padding,
 #architecture {
   /* ensure no white frame around architecture hero */
-  border: 0 !important;
+  /* border: 0 !important; */
+  /* top: -60vh; */
+
 }
 
 /* Create overlap so next section floats over the architecture image */
@@ -5551,4 +5611,18 @@ body.noscroll {
 #architecture .pattern-image {
   position: relative;
   z-index: 1;
+  /* top: -60vh; */
+}
+
+#contact {
+  margin: 6vw;
+}
+
+#friends {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+#whoWeAre p {
+  margin: 30px;
 }

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <link rel="icon" type="image/png" href="assets/img/forma_grayL.png">
-  <link rel="preload" as="video" href="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
+  <link rel="preload" href="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
@@ -424,7 +424,7 @@
       <div class="section section-clients-2 video-padding" id="friends2">
         <div class="video-background">
           <!-- in #friends2 -->
-          <video autoplay muted loop playsinline preload="auto" poster="assets/img/Sgrada_Varna_4_poster.jpg">
+          <video autoplay muted loop playsinline preload="auto">
             <source src="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
           </video>
 
@@ -2949,6 +2949,15 @@
 
 
   <script>
+    // Error handler to catch selector syntax errors
+    window.addEventListener('error', function (e) {
+      if (e.message && e.message.includes('is not a valid selector')) {
+        console.warn('Caught selector error:', e.message);
+        e.preventDefault();
+        return true;
+      }
+    });
+
     (function () {
       var interior = document.getElementById('interior');
       var projects = document.getElementById('projects');
@@ -3059,9 +3068,10 @@
       var lastLiftApplied = null;
 
       // Tunables
-      var leadStartVh = -0.3;      // start lift this fraction of viewport before entering
-      var maxLiftScale = 0.25;     // fraction of viewport height for max lift strength
-      var maxLiftPx = Math.max(200, Math.min(window.innerHeight * maxLiftScale, 500));
+      var leadStartVh = - 1.2;      // start lift this fraction of viewport before entering
+      var maxLiftScale = 0.3;     // fraction of viewport height for max lift strength
+
+      var maxLiftPx = Math.max(1000, Math.min(window.innerHeight * maxLiftScale, 500));
 
       function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
