@@ -3072,9 +3072,9 @@
       var lastLiftApplied = null;
 
       // Tunables
-      var leadStartVh = - 0.65;      // start lift this fraction of viewport before entering
-      var maxLiftScale = 0.3;     // fraction of viewport height for max lift strength
-      var maxLiftPx = Math.max(1100, Math.min(window.innerHeight * maxLiftScale, 640));
+      var leadStartVh = - 0.45;      // start lift this fraction of viewport before entering
+      var maxLiftScale = 1.3;     // fraction of viewport height for max lift strength
+      var maxLiftPx = Math.max(960, Math.min(window.innerHeight * maxLiftScale, 1400));
 
       function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
@@ -3084,13 +3084,16 @@
         var currentScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
         var scrollingDown = currentScrollY >= prevScrollY;
 
+        // Ensure maxLiftPx is properly calculated for current viewport
+        var currentMaxLiftPx = Math.max(960, Math.min(vh * maxLiftScale, 1400));
+
         var lift;
         if (rect.top >= vh) {
           // Before interior enters viewport: no lift
           lift = 0;
         } else if (rect.bottom <= 0) {
           // After interior fully leaves viewport above: keep max lift (prevent snap-back)
-          lift = -maxLiftPx;
+          lift = -currentMaxLiftPx;
         } else {
           // While crossing viewport: interpolate
           var range = rect.height + vh;
@@ -3099,7 +3102,7 @@
           var progress = Math.max(0, Math.min(1, (passed + leadPx) / range));
           // Speed curve (faster early, smooth finish)
           var eased = easeOutCubic(progress);
-          lift = -eased * maxLiftPx;
+          lift = -eased * currentMaxLiftPx;
         }
 
         // Direction-aware clamp to avoid jumps while scrolling down
@@ -3110,7 +3113,7 @@
 
         // Absolute clamps: never positive (down) and never exceed max lift
         if (lift > 0) lift = 0;
-        if (lift < -maxLiftPx) lift = -maxLiftPx;
+        if (lift < -currentMaxLiftPx) lift = -currentMaxLiftPx;
 
         // Stabilize rendering: fix precision and set transform-origin
         var liftRounded = Math.round(lift * 100) / 100; // avoid subpixel churn
@@ -3152,10 +3155,28 @@
         onScroll();
       }, { passive: true });
       window.addEventListener('resize', function () {
-        maxLiftPx = Math.max(180, Math.min(window.innerHeight * maxLiftScale, 900));
+        maxLiftPx = Math.max(960, Math.min(window.innerHeight * maxLiftScale, 1400));
         onScroll();
       });
-      window.addEventListener('load', onScroll);
+
+      // Mobile-specific initialization
+      function initMobileParallax() {
+        // Force recalculation on mobile devices
+        var isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          maxLiftPx = Math.max(960, Math.min(window.innerHeight * maxLiftScale, 1400));
+          // Reset state to prevent stuck animations
+          lastLiftApplied = null;
+          prevScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+        }
+        onScroll();
+      }
+
+      window.addEventListener('load', initMobileParallax);
+      window.addEventListener('orientationchange', function () {
+        // Handle orientation changes on mobile
+        setTimeout(initMobileParallax, 100);
+      });
       onScroll();
     })();
   </script>
@@ -3172,10 +3193,10 @@
       var lastLiftApplied = null;
 
       // Tunables
-      var leadStartVh = - 1.2;      // start lift this fraction of viewport before entering
-      var maxLiftScale = 0.3;     // fraction of viewport height for max lift strength
+      var leadStartVh = -0.9;      // start lift this fraction of viewport before entering
+      var maxLiftScale = 1.3;     // fraction of viewport height for max lift strength (1/3 of interior)
 
-      var maxLiftPx = Math.max(1000, Math.min(window.innerHeight * maxLiftScale, 500));
+      var maxLiftPx = Math.max(260, Math.min(window.innerHeight * maxLiftScale, 467));
 
       function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
@@ -3185,13 +3206,16 @@
         var currentScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
         var scrollingDown = currentScrollY >= prevScrollY;
 
+        // Ensure maxLiftPx is properly calculated for current viewport
+        var currentMaxLiftPx = Math.max(260, Math.min(vh * maxLiftScale, 467));
+
         var lift;
         if (rect.top >= vh) {
           // Before architecture enters viewport: no lift
           lift = 0;
         } else if (rect.bottom <= 0) {
           // After architecture fully leaves viewport above: keep max lift (prevent snap-back)
-          lift = -maxLiftPx;
+          lift = -currentMaxLiftPx;
         } else {
           // While crossing viewport: interpolate
           var range = rect.height + vh;
@@ -3200,7 +3224,7 @@
           var progress = Math.max(0, Math.min(1, (passed + leadPx) / range));
           // Speed curve (faster early, smooth finish)
           var eased = easeOutCubic(progress);
-          lift = -eased * maxLiftPx;
+          lift = -eased * currentMaxLiftPx;
         }
 
         // Direction-aware clamp to avoid jumps while scrolling down
@@ -3211,7 +3235,7 @@
 
         // Absolute clamps: never positive (down) and never exceed max lift
         if (lift > 0) lift = 0;
-        if (lift < -maxLiftPx) lift = -maxLiftPx;
+        if (lift < -currentMaxLiftPx) lift = -currentMaxLiftPx;
 
         // Stabilize rendering: fix precision and set transform-origin
         var liftRounded = Math.round(lift * 100) / 100; // avoid subpixel churn
@@ -3253,7 +3277,7 @@
         onScroll();
       }, { passive: true });
       window.addEventListener('resize', function () {
-        maxLiftPx = Math.max(200, Math.min(window.innerHeight * maxLiftScale, 500));
+        maxLiftPx = Math.max(260, Math.min(window.innerHeight * maxLiftScale, 467));
         onScroll();
       });
       window.addEventListener('load', onScroll);

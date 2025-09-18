@@ -5604,13 +5604,13 @@ body.noscroll {
 #architecture {
   /* ensure no white frame around architecture hero */
   /* border: 0 !important; */
-  /* top: -60vh; */
+  top: -20vh;
 
 }
 
 /* Create overlap so next section floats over the architecture image */
 #architecture+.section.section-we-made-1 {
-  margin-top: -40vh;
+  /* margin-top: -40vh; */
   /* overlap over architecture */
   position: relative;
   z-index: 2;
