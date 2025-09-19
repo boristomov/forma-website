@@ -6,8 +6,8 @@
   <link rel="icon" type="image/png" href="assets/img/forma_grayL.png">
   <link rel="preload" href="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
 
-  <!-- Google reCAPTCHA Enterprise -->
-  <script src="https://www.google.com/recaptcha/enterprise.js?render=6Lf6-M0rAAAAADEMc7ik-Qo-Rud8i10Zxpneqg3B"></script>
+  <!-- Google reCAPTCHA v3 -->
+  <script src="https://www.google.com/recaptcha/api.js?render=6Lf6-M0rAAAAADEMc7ik-Qo-Rud8i10Zxpneqg3B"></script>
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
@@ -3347,29 +3347,43 @@
       msgBox.innerHTML = `<div class="alert ${cls}" role="alert" style="margin-top:8px;">${html}</div>`;
     };
 
-    // reCAPTCHA Enterprise verification system
+    // reCAPTCHA v3 verification system
     let recaptchaToken = null;
     const RECAPTCHA_SITE_KEY = '6Lf6-M0rAAAAADEMc7ik-Qo-Rud8i10Zxpneqg3B';
 
-    // Initialize reCAPTCHA Enterprise
+    // Initialize reCAPTCHA v3
     function initializeRecaptcha() {
-      if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-        grecaptcha.enterprise.ready(function () {
+      console.log('Initializing reCAPTCHA v3...');
+      if (typeof grecaptcha !== 'undefined') {
+        console.log('reCAPTCHA v3 API loaded successfully');
+        grecaptcha.ready(function () {
+          console.log('reCAPTCHA v3 ready');
           // Generate token on page load
           generateRecaptchaToken();
         });
+      } else {
+        console.error('reCAPTCHA v3 API not loaded or not available');
+        console.log('grecaptcha available:', typeof grecaptcha !== 'undefined');
       }
     }
 
     // Generate reCAPTCHA token
     function generateRecaptchaToken() {
-      if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-        grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, { action: 'contact_form' }).then(function (token) {
+      console.log('Generating reCAPTCHA token...');
+      if (typeof grecaptcha !== 'undefined') {
+        grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact_form' }).then(function (token) {
+          console.log('reCAPTCHA token generated:', token ? 'Success' : 'Failed');
           recaptchaToken = token;
           document.querySelector('.recaptcha-container').classList.remove('error');
           document.querySelector('.recaptcha-container').classList.add('success');
           document.querySelector('.help-text').textContent = '✓ Защитата е активна';
+        }).catch(function (error) {
+          console.error('reCAPTCHA token generation failed:', error);
+          document.querySelector('.recaptcha-container').classList.add('error');
+          document.querySelector('.help-text').textContent = '✗ Грешка с защитата';
         });
+      } else {
+        console.error('Cannot generate token - reCAPTCHA v3 not available');
       }
     }
 
