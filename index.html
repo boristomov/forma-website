@@ -6,8 +6,8 @@
   <link rel="icon" type="image/png" href="assets/img/forma_grayL.png">
   <link rel="preload" href="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
 
-  <!-- Google reCAPTCHA v2 -->
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <!-- Google reCAPTCHA Enterprise -->
+  <script src="https://www.google.com/recaptcha/enterprise.js?render=6Lf6-M0rAAAAADEMc7ik-Qo-Rud8i10Zxpneqg3B"></script>
 
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
@@ -713,9 +713,11 @@
               <div class="col-md-12">
                 <div class="form-group add-animation animation-4" id="antiBotSection">
                   <div class="recaptcha-container">
-                    <div class="g-recaptcha" data-sitekey="6LdWQM4rAAAAAKeQD1cxsSmL77TFEd-bQCdT6bdh"
-                      data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
-                    <small class="help-text">Моля, потвърдете, че не сте бот.</small>
+                    <div class="recaptcha-v3-info">
+                      <i class="fa fa-shield" style="color: #c5a47e; margin-right: 8px;"></i>
+                      <span>Защита от ботове е активирана</span>
+                    </div>
+                    <small class="help-text">reCAPTCHA работи в фонов режим за ваша сигурност.</small>
                   </div>
 
                   <!-- Honeypot field (hidden from users) -->
@@ -3345,23 +3347,31 @@
       msgBox.innerHTML = `<div class="alert ${cls}" role="alert" style="margin-top:8px;">${html}</div>`;
     };
 
-    // reCAPTCHA verification system
-    let isRecaptchaValid = false;
+    // reCAPTCHA Enterprise verification system
+    let recaptchaToken = null;
+    const RECAPTCHA_SITE_KEY = '6Lf6-M0rAAAAADEMc7ik-Qo-Rud8i10Zxpneqg3B';
 
-    // reCAPTCHA callback functions
-    window.onRecaptchaSuccess = function (token) {
-      isRecaptchaValid = true;
-      document.querySelector('.recaptcha-container').classList.remove('error');
-      document.querySelector('.recaptcha-container').classList.add('success');
-      document.querySelector('.help-text').textContent = '✓ Верификацията е успешна!';
-    };
+    // Initialize reCAPTCHA Enterprise
+    function initializeRecaptcha() {
+      if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+        grecaptcha.enterprise.ready(function () {
+          // Generate token on page load
+          generateRecaptchaToken();
+        });
+      }
+    }
 
-    window.onRecaptchaExpired = function () {
-      isRecaptchaValid = false;
-      document.querySelector('.recaptcha-container').classList.remove('success');
-      document.querySelector('.recaptcha-container').classList.add('error');
-      document.querySelector('.help-text').textContent = '✗ Верификацията изтече. Моля, опитайте отново.';
-    };
+    // Generate reCAPTCHA token
+    function generateRecaptchaToken() {
+      if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+        grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, { action: 'contact_form' }).then(function (token) {
+          recaptchaToken = token;
+          document.querySelector('.recaptcha-container').classList.remove('error');
+          document.querySelector('.recaptcha-container').classList.add('success');
+          document.querySelector('.help-text').textContent = '✓ Защитата е активна';
+        });
+      }
+    }
 
     function validateAntiBot() {
       const honeypot = document.querySelector('input[name="website"]').value;
@@ -3371,16 +3381,20 @@
         return false;
       }
 
-      // Check reCAPTCHA
-      if (!isRecaptchaValid) {
+      // Check reCAPTCHA token
+      if (!recaptchaToken) {
         document.querySelector('.recaptcha-container').classList.remove('success');
         document.querySelector('.recaptcha-container').classList.add('error');
-        document.querySelector('.help-text').textContent = '✗ Моля, потвърдете, че не сте бот.';
+        document.querySelector('.help-text').textContent = '✗ Грешка с защитата. Моля, опитайте отново.';
+        generateRecaptchaToken(); // Try to regenerate
         return false;
       }
 
       return true;
     }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initializeRecaptcha);
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -3395,6 +3409,8 @@
       const url = "https://forma-api-kxgi.onrender.com/api/contact";
 
       const data = Object.fromEntries(new FormData(form).entries());
+      // Add reCAPTCHA token to form data
+      data['g-recaptcha-response'] = recaptchaToken;
       const submitBtn = form.querySelector('button[type="submit"]');
 
       // disable while sending
@@ -3414,28 +3430,22 @@
         if (res.ok && payload.ok) {
           showMsg("✅ Съобщението беше изпратено успешно!", "success");
           form.reset();
-          // Reset reCAPTCHA after successful submission
-          grecaptcha.reset();
-          isRecaptchaValid = false;
-          document.querySelector('.recaptcha-container').classList.remove('success', 'error');
-          document.querySelector('.help-text').textContent = 'Моля, потвърдете, че не сте бот.';
+          // Regenerate reCAPTCHA token after successful submission
+          generateRecaptchaToken();
         } else if (res.status === 429) {
           showMsg("⏳ Твърде много опити. Опитайте отново след малко.", "warning");
-          // Reset reCAPTCHA on rate limit
-          grecaptcha.reset();
-          isRecaptchaValid = false;
+          // Regenerate reCAPTCHA token on rate limit
+          generateRecaptchaToken();
         } else {
           showMsg(`❌ Грешка при изпращането: ${payload.error || ("HTTP " + res.status)}`, "error");
-          // Reset reCAPTCHA on error
-          grecaptcha.reset();
-          isRecaptchaValid = false;
+          // Regenerate reCAPTCHA token on error
+          generateRecaptchaToken();
         }
       } catch (err) {
         console.error("Fetch error:", err);
         showMsg(`⚠️ Сървърна грешка: ${err.message}`, "error");
-        // Reset reCAPTCHA on error
-        grecaptcha.reset();
-        isRecaptchaValid = false;
+        // Regenerate reCAPTCHA token on error
+        generateRecaptchaToken();
       } finally {
         if (submitBtn) submitBtn.disabled = false;
       }

@@ -1451,9 +1451,17 @@ fieldset[disabled] .form-control {
   background: linear-gradient(135deg, rgba(197, 164, 126, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
 }
 
-.recaptcha-container .g-recaptcha {
-  display: inline-block;
+.recaptcha-v3-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  background: rgba(197, 164, 126, 0.1);
+  border-radius: 6px;
   margin: 10px 0;
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
 .help-text {
