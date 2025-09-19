@@ -3207,7 +3207,7 @@
         var scrollingDown = currentScrollY >= prevScrollY;
 
         // Ensure maxLiftPx is properly calculated for current viewport
-        var currentMaxLiftPx = Math.max(260, Math.min(vh * maxLiftScale, 467));
+        var currentMaxLiftPx = Math.max(240, Math.min(vh * maxLiftScale, 260));
 
         var lift;
         if (rect.top >= vh) {
@@ -3656,5 +3656,143 @@
 
 
 
+
+<!-- Prevent background scrolling when modal is open -->
+<script>
+  // Global scroll position storage
+  let savedScrollPosition = 0;
+  let isModalCurrentlyOpen = false;
+
+  // Override the existing modal system
+  document.addEventListener('DOMContentLoaded', function () {
+    // Store original functions
+    const originalShowModal = window.rubik.showModal;
+    const originalCloseModal = function () {
+      // This will be overridden by the close button handler
+    };
+
+    // Override showModal
+    window.rubik.showModal = function (button) {
+      // Save current scroll position BEFORE opening modal
+      savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop || 0;
+      isModalCurrentlyOpen = true;
+
+      // Calculate scrollbar width to prevent content shift
+      const scrollbarWidth = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+
+      // Reset parallax transforms to prevent image shifting
+      if (window.rubik.resetParallaxTransforms) {
+        window.rubik.resetParallaxTransforms();
+      }
+
+      // Call original function
+      originalShowModal.call(this, button);
+
+      // Apply scroll lock immediately with scrollbar compensation
+      setTimeout(() => {
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${savedScrollPosition}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+        // Compensate for scrollbar width to prevent content shift
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+        // Apply scrollbar compensation to modal content to prevent shift when scrollbar appears
+        setTimeout(() => {
+          const modal = document.querySelector('.project-content.open');
+          if (modal) {
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+              // Check if content is scrollable and apply compensation
+              const checkAndApply = () => {
+                if (modalContent.scrollHeight > modalContent.clientHeight) {
+                  modalContent.style.paddingRight = `${scrollbarWidth}px`;
+                }
+              };
+
+              // Apply immediately
+              checkAndApply();
+
+              // Also check after a short delay in case content loads dynamically
+              setTimeout(checkAndApply, 200);
+            }
+          }
+        }, 100);
+      }, 50);
+    };
+
+    // Override close functionality
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('icon-close') || e.target.closest('.icon-close')) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Find the modal
+        const modal = e.target.closest('.project-content');
+        if (modal) {
+          // Close the modal
+          modal.classList.remove('open', 'scroll');
+          document.body.classList.remove('noscroll');
+
+          // Restore scroll position IMMEDIATELY
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.left = '';
+          document.body.style.right = '';
+          document.body.style.width = '';
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+
+          // Remove padding from modal content
+          const modalContent = modal.querySelector('.modal-content');
+          if (modalContent) {
+            modalContent.style.paddingRight = '';
+          }
+
+          // Force scroll to saved position multiple times to ensure it sticks
+          window.scrollTo(0, savedScrollPosition);
+
+          // Additional scroll enforcement
+          setTimeout(() => {
+            window.scrollTo(0, savedScrollPosition);
+          }, 0);
+
+          setTimeout(() => {
+            window.scrollTo(0, savedScrollPosition);
+          }, 10);
+
+          setTimeout(() => {
+            window.scrollTo(0, savedScrollPosition);
+          }, 50);
+
+          // Clean up modal
+          setTimeout(() => {
+            modal.classList.remove('has-background');
+            setTimeout(() => {
+              modal.removeAttribute('style');
+            }, 450);
+          }, 500);
+
+          isModalCurrentlyOpen = false;
+        }
+      }
+    });
+
+    // Additional safety: prevent any scroll events when modal is open
+    document.addEventListener('scroll', function (e) {
+      if (isModalCurrentlyOpen) {
+        e.preventDefault();
+        window.scrollTo(0, savedScrollPosition);
+
+        // Reset parallax transforms if they somehow get applied
+        if (window.rubik.resetParallaxTransforms) {
+          window.rubik.resetParallaxTransforms();
+        }
+      }
+    }, { passive: false });
+  });
+</script>
 
 </html>

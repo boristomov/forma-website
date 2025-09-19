@@ -299,6 +299,11 @@ rubik = {
     }, 17),
 
     checkScrollForParallax: debounce(function () {
+        // Skip parallax if modal is open
+        if (document.body.classList.contains('noscroll') || document.querySelector('.project-content.open')) {
+            return;
+        }
+
         no_of_elements = 0;
         $('.parallax').each(function () {
             var $elem = $(this);
@@ -314,6 +319,11 @@ rubik = {
         });
 
     }, 6),
+
+    resetParallaxTransforms: function () {
+        // Reset all parallax image transforms when modal is opened
+        $('.parallax img').css('transform', 'translate3d(0px, 0px, 0px)');
+    },
 
     checkScrollForContentTransitions: debounce(function () {
         $('.content-with-opacity').each(function () {
@@ -367,19 +377,10 @@ rubik = {
             $(modal).addClass('scroll');
         }, 1000);
 
-        $('.icon-close').click(function () {
-            $project_content = $(this).closest('.project-content');
-            $project_content.removeClass('open scroll');
-
-            $('body').removeClass("noscroll");
-            //$('a').removeClass('no-opacity');
-            setTimeout(function () {
-                $project_content.removeClass('has-background');
-                setTimeout(function () {
-                    $project_content.removeAttr('style');
-                }, 450);
-            }, 500);
-        });
+        // Close functionality is now handled by the HTML script for better scroll restoration
+        // $('.icon-close').click(function () {
+        //     // This is now handled by the HTML script
+        // });
     },
 
     initGoogleMaps: function () {

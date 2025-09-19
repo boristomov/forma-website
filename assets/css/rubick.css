@@ -3895,12 +3895,68 @@ a.carousel-control span.fa {
 }
 
 body.noscroll {
-  overflow: hidden;
+  overflow: hidden !important;
   padding-right: 0;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* Additional modal state for smoother transitions */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure smooth restoration without flash */
+body.modal-open * {
+  transition: none !important;
+}
+
+/* Prevent content shift when scrollbar disappears */
+body.noscroll {
+  overflow: hidden !important;
+  padding-right: 0 !important;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  /* Smooth transition for scrollbar compensation */
+  transition: padding-right 0.1s ease-out;
 }
 
 .project-content.scroll {
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent background scrolling when modal is open */
+.project-content.open {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  /* Prevent content shift when scrollbar appears */
+  box-sizing: border-box !important;
+}
+
+/* Ensure modal content is scrollable but background isn't */
+.project-content.open .modal-content {
+  max-height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Prevent content shift when scrollbar appears */
+  box-sizing: border-box !important;
+  width: 100% !important;
+  /* Ensure content doesn't shift when scrollbar appears */
+  padding-right: 0 !important;
+  margin-right: 0 !important;
 }
 
 .hidde {
@@ -5292,6 +5348,12 @@ body.noscroll {
   overflow: hidden;
 }
 
+#friends2 {
+  top: -125px;
+
+}
+
+
 #friends2 .overlay-content {
   /* position: absolute; */
   top: 0;
@@ -6204,14 +6266,81 @@ body.noscroll {
   z-index: 1;
 }
 
+/* Prevent interior section from shifting when modal is open */
+body.noscroll #interior {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+}
+
+body.noscroll #interior .pattern-image {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  z-index: 1 !important;
+  transform: none !important;
+}
+
+body.noscroll #interior .pattern-image img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transform: none !important;
+}
+
 /* Slightly slower parallax visual via existing JS (translate3d on .parallax > img) */
 #interior .parallax>img {
   will-change: transform;
 }
 
+/* Disable parallax transforms when modal is open */
+body.noscroll #interior .parallax>img {
+  transform: none !important;
+  will-change: auto !important;
+}
+
+body.noscroll #architecture .parallax>img {
+  transform: none !important;
+  will-change: auto !important;
+}
+
 /* Architecture section: remove gradient and frame, enable overlap */
 #architecture .pattern-image:after {
   display: none !important;
+}
+
+/* Prevent architecture section from shifting when modal is open */
+body.noscroll #architecture {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+}
+
+body.noscroll #architecture .pattern-image {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  z-index: 1 !important;
+  transform: none !important;
+}
+
+body.noscroll #architecture .pattern-image img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  transform: none !important;
 }
 
 #architecture.image-padding,
