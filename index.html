@@ -2870,7 +2870,9 @@
   <script>
     (function () {
       // Enable on desktop widths OR fine pointers (covers your 991px case)
-      const enable = window.innerWidth >= 992 || matchMedia('(pointer:fine)').matches;
+      // Also check for mobile devices explicitly
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      const enable = (window.innerWidth >= 992 || matchMedia('(pointer:fine)').matches) && !isMobile;
       if (!enable) return;
 
       // Ensure cursor element exists

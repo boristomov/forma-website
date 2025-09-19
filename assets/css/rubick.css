@@ -1378,6 +1378,62 @@ fieldset[disabled] .form-control {
   }
 }
 
+/* Hide cursor on mobile devices */
+@media (max-width: 768px) {
+  * {
+    cursor: none !important;
+  }
+
+  /* Hide custom cursor completely on mobile */
+  .fx-cursor {
+    display: none !important;
+  }
+
+  /* Re-enable cursor for interactive elements on mobile */
+  button,
+  a,
+  input,
+  textarea,
+  select,
+  .btn,
+  .project,
+  .member,
+  .card,
+  .section-with-hover,
+  .project-image,
+  .project-content,
+  .team,
+  .member,
+  .icon-close {
+    cursor: pointer !important;
+  }
+}
+
+/* Adjust navbar logo and menu button positioning */
+.navbar .navbar-brand {
+  margin-right: 20px;
+  /* Move logo slightly right */
+}
+
+.navbar .navbar-toggle {
+  margin-left: 20px;
+  /* Move menu button slightly left */
+}
+
+/* Mobile adjustments for navbar spacing */
+@media (max-width: 768px) {
+  .navbar .navbar-brand {
+    margin-left: 25px;
+
+    /* Slightly less spacing on mobile */
+  }
+
+  .navbar .navbar-toggle {
+    margin-right: 25px;
+    /* Slightly less spacing on mobile */
+  }
+}
+
 .navbar .navbar-nav>li>a {
   padding: 10px 15px;
   margin: 15px 3px;
