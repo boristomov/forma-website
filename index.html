@@ -6,6 +6,9 @@
   <link rel="icon" type="image/png" href="assets/img/forma_grayL.png">
   <link rel="preload" href="assets/img/Sgrada_Varna_4.mp4" type="video/mp4">
 
+  <!-- Google reCAPTCHA v2 -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
   <title>Форма Интериорен Дизайн | Студио за цялостно проектно изпълнение</title>
@@ -705,8 +708,24 @@
                     rows="8" required></textarea>
                 </div>
               </div>
+
+              <!-- Anti-bot verification -->
+              <div class="col-md-12">
+                <div class="form-group add-animation animation-4" id="antiBotSection">
+                  <div class="recaptcha-container">
+                    <div class="g-recaptcha" data-sitekey="6LdWQM4rAAAAAKeQD1cxsSmL77TFEd-bQCdT6bdh"
+                      data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
+                    <small class="help-text">Моля, потвърдете, че не сте бот.</small>
+                  </div>
+
+                  <!-- Honeypot field (hidden from users) -->
+                  <input type="text" name="website" style="display: none !important; position: absolute; left: -9999px;"
+                    tabindex="-1" autocomplete="off">
+                </div>
+              </div>
+
               <div class="col-md-2 col-md-offset-5">
-                <button type="submit" class="btn btn-lg btn-black btn-contact">
+                <button type="submit" class="btn btn-lg btn-black btn-contact" id="submitBtn">
                   ИЗПРАЩАНЕ <i class="fa fa-paper-plane"></i>
                 </button>
               </div>
@@ -3326,10 +3345,53 @@
       msgBox.innerHTML = `<div class="alert ${cls}" role="alert" style="margin-top:8px;">${html}</div>`;
     };
 
+    // reCAPTCHA verification system
+    let isRecaptchaValid = false;
+
+    // reCAPTCHA callback functions
+    window.onRecaptchaSuccess = function (token) {
+      isRecaptchaValid = true;
+      document.querySelector('.recaptcha-container').classList.remove('error');
+      document.querySelector('.recaptcha-container').classList.add('success');
+      document.querySelector('.help-text').textContent = '✓ Верификацията е успешна!';
+    };
+
+    window.onRecaptchaExpired = function () {
+      isRecaptchaValid = false;
+      document.querySelector('.recaptcha-container').classList.remove('success');
+      document.querySelector('.recaptcha-container').classList.add('error');
+      document.querySelector('.help-text').textContent = '✗ Верификацията изтече. Моля, опитайте отново.';
+    };
+
+    function validateAntiBot() {
+      const honeypot = document.querySelector('input[name="website"]').value;
+
+      // Check honeypot (should be empty)
+      if (honeypot) {
+        return false;
+      }
+
+      // Check reCAPTCHA
+      if (!isRecaptchaValid) {
+        document.querySelector('.recaptcha-container').classList.remove('success');
+        document.querySelector('.recaptcha-container').classList.add('error');
+        document.querySelector('.help-text').textContent = '✗ Моля, потвърдете, че не сте бот.';
+        return false;
+      }
+
+      return true;
+    }
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // always use absolute API URL; file:// pages don’t have a good base
+      // Validate anti-bot verification first
+      if (!validateAntiBot()) {
+        showMsg("Моля, отговорете правилно на въпроса за сигурност.", "error");
+        return;
+      }
+
+      // always use absolute API URL; file:// pages don't have a good base
       const url = "https://forma-api-kxgi.onrender.com/api/contact";
 
       const data = Object.fromEntries(new FormData(form).entries());
@@ -3352,14 +3414,28 @@
         if (res.ok && payload.ok) {
           showMsg("✅ Съобщението беше изпратено успешно!", "success");
           form.reset();
+          // Reset reCAPTCHA after successful submission
+          grecaptcha.reset();
+          isRecaptchaValid = false;
+          document.querySelector('.recaptcha-container').classList.remove('success', 'error');
+          document.querySelector('.help-text').textContent = 'Моля, потвърдете, че не сте бот.';
         } else if (res.status === 429) {
           showMsg("⏳ Твърде много опити. Опитайте отново след малко.", "warning");
+          // Reset reCAPTCHA on rate limit
+          grecaptcha.reset();
+          isRecaptchaValid = false;
         } else {
           showMsg(`❌ Грешка при изпращането: ${payload.error || ("HTTP " + res.status)}`, "error");
+          // Reset reCAPTCHA on error
+          grecaptcha.reset();
+          isRecaptchaValid = false;
         }
       } catch (err) {
         console.error("Fetch error:", err);
         showMsg(`⚠️ Сървърна грешка: ${err.message}`, "error");
+        // Reset reCAPTCHA on error
+        grecaptcha.reset();
+        isRecaptchaValid = false;
       } finally {
         if (submitBtn) submitBtn.disabled = false;
       }
