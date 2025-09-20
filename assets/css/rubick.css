@@ -4546,6 +4546,7 @@ body.noscroll {
 .project-content>div .project-details .project-image img {
   width: 100%;
   height: auto;
+  max-height: 100vh;
   background: contain;
 }
 
@@ -4557,6 +4558,7 @@ body.noscroll {
 .project-content>div .project-details .product .project-image img {
   width: 100%;
   height: auto;
+  max-height: 100vh;
 }
 
 .project-content>div .project-details .product .project-text.text-right {
@@ -5151,15 +5153,12 @@ body.noscroll {
 /* Images */
 #tennera-details .project-image img {
   display: block;
-  width: 100%;
+  width: auto;
+  justify-self: center;
   height: auto;
-  border-left: 50px solid rgba(255, 255, 255, 0.2);
-  ;
-  border-top: 100px solid rgba(255, 255, 255, 0.2);
-  ;
-  border-bottom: 100px solid rgba(255, 255, 255, 0.2);
-  ;
-  border-right: 50px solid rgba(255, 255, 255, 0.2);
+  max-height: 100vh;
+  border: 2em solid rgba(255, 255, 255, 0.2);
+
 }
 
 /* Respect users who prefer less motion */
